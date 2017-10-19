@@ -1,13 +1,35 @@
-sealed trait Exp
-case class IntLiteral(i: Int) extends Exp
-case class Binop(e1: Exp, op: Op, e2: Exp) extends Exp
-case class Paren(e: Exp) extends Exp
+sealed trait Exp {
+  def asString(): String
+}
+case class IntLiteral(i: Int) extends Exp {
+  def asString(): String = i.toString
+}
+case class Binop(e1: Exp, op: Op, e2: Exp) extends Exp {
+  def asString(): String = {
+    Seq(e1.asString, op.asString, e2.asString).mkString(" ")
+  }
+}
+case class Paren(e: Exp) extends Exp {
+  def asString(): String = {
+    "(" + e.asString + ")"
+  }
+}
 
-sealed trait Op
-case object Plus extends Op
-case object Minus extends Op
-case object Mult extends Op
-case object Div extends Op
+sealed trait Op {
+  def asString(): String
+}
+case object Plus extends Op {
+  def asString(): String = "+"
+}
+case object Minus extends Op {
+  def asString(): String = "-"
+}
+case object Mult extends Op {
+  def asString(): String = "*"
+}
+case object Div extends Op {
+  def asString(): String = "/"
+}
 
 import Generator._
 
@@ -26,4 +48,14 @@ object Exp {
 
   lazy val exp: Generator[Exp] =
     literal | binop | paren
+}
+
+object Main {
+  def main(args: Array[String]) {
+    if (args.length != 1) {
+      println("Needs an integer depth bound")
+    } else {
+      new GenAsScalaIterator(Exp.exp.makeGenIterator(args(0).toInt)).foreach(a => println(a.asString))
+    }
+  } // main
 }

@@ -1,23 +1,6 @@
 trait GenIterator[+A] {
   def next(): Option[A]
   def reset(): Unit
-
-  // really only for testing
-  def toSeq(): Seq[A] = {
-    val retval = scala.collection.mutable.Buffer[A]()
-    @scala.annotation.tailrec
-    def loop(cur: Option[A]) {
-      cur match {
-        case Some(a) => {
-          retval += a
-          loop(next())
-        }
-        case None => ()
-      }
-    }
-    loop(next())
-    retval.toSeq
-  }
 }
 
 object EmptyGenIterator extends GenIterator[Nothing] {
@@ -127,4 +110,20 @@ object GenIterator {
   } // map
 }
 
+class GenAsScalaIterator[A](private val around: GenIterator[A])
+extends Iterator[A] {
+  private var current: Option[A] = around.next()
+  def hasNext(): Boolean = {
+    current.isDefined
+  }
 
+  def next(): A = {
+    val retval = current.get
+    current = around.next()
+    retval
+  }
+
+  def reset() {
+    around.reset()
+  }
+}
