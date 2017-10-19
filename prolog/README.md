@@ -1,0 +1,2 @@
+- The actual generation specification is in `generator.pl`
+- Total line count for the spec: 10

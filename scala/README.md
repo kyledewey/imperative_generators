@@ -1,0 +1,2 @@
+- The actual generation specification is in `ast.java`
+- Total line count for the spec: 24
