@@ -1,4 +1,4 @@
-trait Iterator[+A] {
+trait GenIterator[+A] {
   def next(): Option[A]
   def reset(): Unit
 
@@ -20,14 +20,14 @@ trait Iterator[+A] {
   }
 }
 
-object EmptyIterator extends Iterator[Nothing] {
+object EmptyGenIterator extends GenIterator[Nothing] {
   def next(): Option[Nothing] = None
   def reset() {}
 }
 
-object Iterator {
-  def singletonIterator[A](a: A): Iterator[A] = {
-    new Iterator[A] {
+object GenIterator {
+  def singletonGenIterator[A](a: A): GenIterator[A] = {
+    new GenIterator[A] {
       private var taken = false
       def next(): Option[A] = {
         if (taken) {
@@ -43,8 +43,8 @@ object Iterator {
     }
   }
 
-  def and[A, B, C](first: Iterator[A], second: Iterator[B], f: (A, B) => C): Iterator[C] = {
-    new Iterator[C] {
+  def and[A, B, C](first: GenIterator[A], second: GenIterator[B], f: (A, B) => C): GenIterator[C] = {
+    new GenIterator[C] {
       private var init = true
       private var lastA: Option[A] = None
       def next(): Option[C] = {
@@ -77,14 +77,14 @@ object Iterator {
     }
   } // and
 
-  def or[A](first: Iterator[A], second: Iterator[A]): Iterator[A] = {
-    sealed trait WhichIterator
-    case object OnFirst extends WhichIterator
-    case object OnSecond extends WhichIterator
-    case object IsEmpty extends WhichIterator
+  def or[A](first: GenIterator[A], second: GenIterator[A]): GenIterator[A] = {
+    sealed trait WhichGenIterator
+    case object OnFirst extends WhichGenIterator
+    case object OnSecond extends WhichGenIterator
+    case object IsEmpty extends WhichGenIterator
 
-    new Iterator[A] {
-      private var state: WhichIterator = OnFirst
+    new GenIterator[A] {
+      private var state: WhichGenIterator = OnFirst
       def next(): Option[A] = {
         state match {
           case OnFirst => {
@@ -117,8 +117,8 @@ object Iterator {
     }
   } // or
 
-  def map[A, B](around: Iterator[A], f: A => B): Iterator[B] = {
-    new Iterator[B] {
+  def map[A, B](around: GenIterator[A], f: A => B): GenIterator[B] = {
+    new GenIterator[B] {
       def next(): Option[B] = around.next().map(f)
       def reset() {
         around.reset()

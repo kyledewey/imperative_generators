@@ -1,14 +1,14 @@
 trait Generator[+A] {
-  def makeIterator(depth: Int): Iterator[A]
+  def makeGenIterator(depth: Int): GenIterator[A]
 
   def ~[B](otherRaw: => Generator[B]): Generator[~[A, B]] = {
     lazy val other = otherRaw
     val self = this
     new Generator[~[A, B]] {
-      def makeIterator(depth: Int): Iterator[~[A, B]] = {
-        Iterator.and(self.makeIterator(depth),
-                     other.makeIterator(depth),
-                     (a: A, b: B) => new ~(a, b))
+      def makeGenIterator(depth: Int): GenIterator[~[A, B]] = {
+        GenIterator.and(self.makeGenIterator(depth),
+                        other.makeGenIterator(depth),
+                        (a: A, b: B) => new ~(a, b))
       }
     }
   }
@@ -17,9 +17,9 @@ trait Generator[+A] {
     lazy val other = otherRaw
     val self = this
     new Generator[B] {
-      def makeIterator(depth: Int): Iterator[B] = {
-        Iterator.or(self.makeIterator(depth),
-                    other.makeIterator(depth))
+      def makeGenIterator(depth: Int): GenIterator[B] = {
+        GenIterator.or(self.makeGenIterator(depth),
+                       other.makeGenIterator(depth))
       }
     }
   }
@@ -27,11 +27,11 @@ trait Generator[+A] {
   def ^^[B](f: A => B): Generator[B] = {
     val self = this
     new Generator[B] {
-      def makeIterator(depth: Int): Iterator[B] = {
+      def makeGenIterator(depth: Int): GenIterator[B] = {
         if (depth > 0) {
-          Iterator.map(self.makeIterator(depth - 1), f)
+          GenIterator.map(self.makeGenIterator(depth - 1), f)
         } else {
-          EmptyIterator
+          EmptyGenIterator
         }
       }
     }
@@ -44,8 +44,8 @@ object Generator {
   // makes a generator that just produces that thing
   implicit def anythingToGenerator[A](a: A): Generator[A] = {
     new Generator[A] {
-      def makeIterator(depth: Int): Iterator[A] = {
-        Iterator.singletonIterator(a)
+      def makeGenIterator(depth: Int): GenIterator[A] = {
+        GenIterator.singletonGenIterator(a)
       }
     }
   }
