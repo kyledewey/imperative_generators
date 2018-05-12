@@ -42,7 +42,9 @@ class UnificationEnvironment(val mapping: Map[Placeholder, Term]) {
   }
 }
 
-class TermContext(private var mapping: Map[Symbol, Placeholder]) {
+class Scope(private var mapping: Map[Symbol, Placeholder]) {
+  def this() = this(Map())
+
   def asVar(x: Symbol): Placeholder = {
     if (mapping.contains(x)) {
       mapping(x)

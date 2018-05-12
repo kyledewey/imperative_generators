@@ -69,8 +69,8 @@ trait Generator[+A] {
   }
 }
 
-class EmptyGenerator[A] extends Generator[A] {
-  def next(): Option[A] = None
+object EmptyGenerator extends Generator[Nothing] {
+  def next(): Option[Nothing] = None
   def reset() {}
 }
 

@@ -51,7 +51,7 @@ object Exp {
     if (depth > 0) {
       f(depth - 1)
     } else {
-      new EmptyGenerator
+      EmptyGenerator
     }
   }
 

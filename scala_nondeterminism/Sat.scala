@@ -12,7 +12,7 @@ object Sat {
       case Literal(x, isPositive) => {
         input.get(x) match {
           case Some(`isPositive`) => input: Generator[Env]
-          case Some(_) => new EmptyGenerator
+          case Some(_) => EmptyGenerator
           case None => (input + (x -> isPositive)): Generator[Env]
         }
       }
