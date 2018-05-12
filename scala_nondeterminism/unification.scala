@@ -104,11 +104,6 @@ object Scope {
   def cons(head: Term, tail: Term): Term = {
     Structure(".", Seq(head, tail))
   }
-
-  def cons[A, B](head: A, tail: B)(implicit hEv: Termable[A], tailEv: Termable[B], scope: Scope): Term = {
-    cons(hEv.asTerm(head)(scope),
-         tailEv.asTerm(tail)(scope))
-  }
                                    
   def mkList(terms: Term*): Term = {
     terms.foldRight(nil)(cons)
