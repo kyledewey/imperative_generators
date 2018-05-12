@@ -23,26 +23,6 @@ object Append {
     }
     baseCase.or(recursiveCase)
   }
-
-  def appendExplicit(l1: Term, l2: Term, l3: Term): LP = {
-    val baseCase: LP = {
-      for {
-        _ <- unify(l1, nil)
-        _ <- unify(l2, l3)
-      } yield ()
-    }
-    val h = Placeholder()
-    val t = Placeholder()
-    val rest = Placeholder()
-    lazy val recursiveCase: LP = {
-      for {
-        _ <- unify(l1, cons(h, t))
-        _ <- unify(l3, cons(h, rest))
-        _ <- appendExplicit(t, l2, rest)
-       } yield ()
-    }
-    baseCase.or(recursiveCase)
-  }
   
   // append([1, 2], [3, 4], List)
   def testInInOut() {
