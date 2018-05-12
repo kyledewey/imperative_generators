@@ -48,6 +48,8 @@ import LP.Env
 trait LP {
   def reify(env: Env): Generator[Env]
 
+  def and(f: Unit => LP): LP = flatMap(f)
+
   def flatMap(f: Unit => LP): LP = {
     val self = this
     new LP {

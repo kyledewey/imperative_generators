@@ -120,6 +120,15 @@ object Scope {
     def asTerm(i: Int)(implicit scope: Scope): Term = IntTerm(i)
   }
 
+  // Strings act as atoms
+  implicit object StringIsTermable extends Termable[String] {
+    def asTerm(s: String)(implicit scope: Scope): Term = Structure(s, Seq())
+  }
+
+  implicit object TermIsTermable extends Termable[Term] {
+    def asTerm(t: Term)(implicit scope: Scope): Term = t
+  }
+
   implicit def termableToTerm[A](a: A)(implicit ev: Termable[A], scope: Scope): Term = {
     ev.asTerm(a)(scope)
   }
