@@ -79,16 +79,24 @@ class Scope(private var mapping: Map[Symbol, Placeholder]) {
     }
   }
 }
- 
+
 object Scope {
   import scala.language.implicitConversions
 
-  implicit def symbolToPlaceholder(s: Symbol)(implicit ev: Scope): Placeholder = {
-    ev.asVar(s)
+  trait Termable[A] {
+    def asTerm(a: A)(implicit scope: Scope): Term
   }
 
-  implicit def intToTerm(i: Int): IntTerm = {
-    IntTerm(i)
+  implicit object SymbolIsTermable extends Termable[Symbol] {
+    def asTerm(s: Symbol)(implicit scope: Scope): Term = scope.asVar(s)
+  }
+
+  implicit object IntIsTermable extends Termable[Int] {
+    def asTerm(i: Int)(implicit scope: Scope): Term = IntTerm(i)
+  }
+
+  implicit def termableToTerm[A](a: A)(implicit ev: Termable[A], scope: Scope): Term = {
+    ev.asTerm(a)(scope)
   }
 
   val nil: Term = Structure("[]", Seq())
@@ -97,6 +105,11 @@ object Scope {
     Structure(".", Seq(head, tail))
   }
 
+  def cons[A, B](head: A, tail: B)(implicit hEv: Termable[A], tailEv: Termable[B], scope: Scope): Term = {
+    cons(hEv.asTerm(head)(scope),
+         tailEv.asTerm(tail)(scope))
+  }
+                                   
   def mkList(terms: Term*): Term = {
     terms.foldRight(nil)(cons)
   }
