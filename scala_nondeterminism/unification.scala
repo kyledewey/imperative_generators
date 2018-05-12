@@ -71,10 +71,8 @@ class Scope(private var mapping: Map[Symbol, Placeholder]) {
 
   def asVar(x: Symbol): Placeholder = {
     if (mapping.contains(x)) {
-      println("IN ENV: " + x)
       mapping(x)
     } else {
-      println("NOT IN ENV: " + x)
       val retval = Placeholder()
       mapping += (x -> retval)
       retval

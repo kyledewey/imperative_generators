@@ -7,7 +7,6 @@ object Append {
   //     append(T, List, Rest).
   //
   def append(l1: Term, l2: Term, l3: Term): LP = {
-    println("APPEND: " + (l1, l2, l3))
     implicit val scope = new Scope
     val baseCase: LP = {
       for {
@@ -50,13 +49,6 @@ object Append {
     implicit val scope = new Scope
     val query = append(mkList(1, 2), mkList(3, 4), 'list)
     LP.runner(query, Seq('list))
-  }
-
-  // append([1, 2], [3, 4], List)
-  def testInInOutExplicit() {
-    val list = Placeholder()
-    val query = appendExplicit(mkList(1, 2), mkList(3, 4), list)
-    LP.runner(query, Seq(list))
   }
 
   // append(L1, L2, [1, 2, 3, 4])

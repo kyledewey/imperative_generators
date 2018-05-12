@@ -59,9 +59,10 @@ trait LP {
   }
 
   def map(f: Unit => Unit): LP = {
+    val self = this
     new LP {
       def reify(env: Env): Generator[Env] = {
-        new SingletonGenerator(env)
+        self.reify(env)
       }
     }
   }
