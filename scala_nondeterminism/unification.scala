@@ -1,7 +1,21 @@
-sealed trait Term
-case class Placeholder(i: Int) extends Term
-case class IntTerm(i: Int) extends Term
-case class Structure(name: String, terms: Seq[Term]) extends Term
+sealed trait Term {
+  def asString(): String
+}
+case class Placeholder(i: Int) extends Term {
+  def asString(): String = "_" + i
+}
+case class IntTerm(i: Int) extends Term {
+  def asString(): String = i.toString
+}
+case class Structure(name: String, terms: Seq[Term]) extends Term {
+  def asString(): String = {
+    if (terms.isEmpty) {
+      name
+    } else {
+      name + "(" + terms.map(_.asString).mkString(", ") + ")"
+    }
+  }
+}
 
 object Placeholder {
   private var nextId = 0
@@ -14,6 +28,16 @@ object Placeholder {
 }
 
 class UnificationEnvironment(val mapping: Map[Placeholder, Term]) {
+  def fullLookup(t: Term): Term = {
+    lookup(t) match {
+      case p: Placeholder => p
+      case i: IntTerm => i
+      case Structure(name, terms) => {
+        Structure(name, terms.map(fullLookup))
+      }
+    }
+  }
+
   def lookup(t: Term): Term = {
     t match {
       case p: Placeholder if mapping.contains(p) =>
@@ -47,8 +71,10 @@ class Scope(private var mapping: Map[Symbol, Placeholder]) {
 
   def asVar(x: Symbol): Placeholder = {
     if (mapping.contains(x)) {
+      println("IN ENV: " + x)
       mapping(x)
     } else {
+      println("NOT IN ENV: " + x)
       val retval = Placeholder()
       mapping += (x -> retval)
       retval
@@ -57,8 +83,14 @@ class Scope(private var mapping: Map[Symbol, Placeholder]) {
 }
  
 object Scope {
-  def asVar(s: Symbol)(implicit ev: TermContext): Placeholder = {
+  import scala.language.implicitConversions
+
+  implicit def symbolToPlaceholder(s: Symbol)(implicit ev: Scope): Placeholder = {
     ev.asVar(s)
+  }
+
+  implicit def intToTerm(i: Int): IntTerm = {
+    IntTerm(i)
   }
 
   val nil: Term = Structure("[]", Seq())

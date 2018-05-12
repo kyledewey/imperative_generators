@@ -24,6 +24,24 @@ object LP {
       }
     }
   }
+
+  def runner(query: LP, termsOfInterest: Seq[Term]) {
+    val gen = query.reify(new UnificationEnvironment(Map()))
+    @scala.annotation.tailrec
+    def loop(opEnv: Option[Env]) {
+      opEnv match {
+        case Some(env) => {
+          termsOfInterest.foreach(t =>
+            println(env.fullLookup(t).asString))
+          println("----------")
+          loop(gen.next())
+        }
+        case None => ()
+      }
+    }
+
+    loop(gen.next())
+  }
 }
 import LP.Env
 
