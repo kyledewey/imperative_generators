@@ -33,6 +33,7 @@ trait Generator[+A] {
 
       def reset() {
         self.reset()
+        updateGenerator()
       }
     }
   }
