@@ -6,6 +6,23 @@
 object LP {
   type Env = UnificationEnvironment
 
+  // it's possible to do this with a proper state monad, but things
+  // get weird with disjunction.
+  def is(assign: Term, inputs: Seq[Term], f: Seq[Int] => Int): LP = {
+    new LP {
+      def reify(env: Env): Generator[Env] = {
+        val maybeInts = inputs.map(env.lookup)
+        if (maybeInts.forall(_.isInstanceOf[IntTerm])) {
+          import Scope._
+          implicit val s = new Scope
+          unify(assign, f(maybeInts.map(_.asInstanceOf[IntTerm].i))).reify(env)
+        } else {
+          EmptyGenerator
+        }
+      }
+    }
+  }
+
   def unify(t1: Term, t2: Term): LP = {
     new LP {
       def reify(env: Env): Generator[Env] = {
