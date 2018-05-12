@@ -80,6 +80,31 @@ class Scope(private var mapping: Map[Symbol, Placeholder]) {
   }
 }
 
+class PreStructure(val name: String) {
+  import Scope._
+
+  def apply[A](a: A)(implicit scope: Scope,
+                     aEv: Termable[A]): Term = {
+    Structure(name, Seq(aEv.asTerm(a)(scope)))
+  }
+
+  def apply[A, B](a: A, b: B)(implicit scope: Scope,
+                              aEv: Termable[A],
+                              bEv: Termable[B]): Term = {
+    Structure(name, Seq(aEv.asTerm(a)(scope),
+                        bEv.asTerm(b)(scope)))
+  }
+
+  def apply[A, B, C](a: A, b: B, c: C)(implicit scope: Scope,
+                                       aEv: Termable[A],
+                                       bEv: Termable[B],
+                                       cEv: Termable[C]): Term = {
+    Structure(name, Seq(aEv.asTerm(a)(scope),
+                        bEv.asTerm(b)(scope),
+                        cEv.asTerm(c)(scope)))
+  }
+}
+
 object Scope {
   import scala.language.implicitConversions
 
@@ -97,6 +122,10 @@ object Scope {
 
   implicit def termableToTerm[A](a: A)(implicit ev: Termable[A], scope: Scope): Term = {
     ev.asTerm(a)(scope)
+  }
+
+  implicit def symbolToPreStructure(s: Symbol): PreStructure = {
+    new PreStructure(s.name)
   }
 
   val nil: Term = Structure("[]", Seq())
