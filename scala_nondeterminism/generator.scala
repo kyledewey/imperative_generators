@@ -3,9 +3,37 @@ trait Generator[+A] {
   def reset(): Unit
 
   def and[B](f: A => Generator[B]): Generator[B] = {
-    next() match {
-      case Some(a) => f(a)
-      case None => new EmptyGenerator
+    val self = this
+
+    new Generator[B] {
+      // ---BEGIN CONSTRUCTOR---
+      private var curGenerator: Option[Generator[B]] = None
+      updateGenerator()
+      // ---END CONSTRUCTOR---
+
+      private def updateGenerator() {
+        curGenerator = self.next().map(f)
+      }
+
+      @scala.annotation.tailrec
+      def next(): Option[B] = {
+        curGenerator match {
+          case Some(gen) => {
+            gen.next() match {
+              case s@Some(_) => s
+              case None => {
+                updateGenerator()
+                next()
+              }
+            }
+          }
+          case None => None
+        }
+      }
+
+      def reset() {
+        self.reset()
+      }
     }
   }
 
