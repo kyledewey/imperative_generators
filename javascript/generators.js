@@ -79,7 +79,7 @@ function And(baseGen, makeGen) {
     return { next: next };
 }
 
-function Or(first, second) {
+function Or2(first, second) {
     var onFirst = true;
     var isEmpty = false;
     
@@ -108,10 +108,18 @@ function Or(first, second) {
     return { next: next };
 }
 
+function Or() {
+    var retval = empty;
+    for (var i = arguments.length - 1; i >= 0; i--) {
+        retval = Or2(arguments[i], retval);
+    }
+    return retval;
+}
+
 function exp(depth) {
     const literals = Or(Singleton(new Literal(1)),
-                        Or(Singleton(new Literal(2)),
-                           Singleton(new Literal(3))));
+                        Singleton(new Literal(2)),
+                        Singleton(new Literal(3)));
     if (depth > 0) {
         var nested = And(exp(depth - 1),
                          function (e1) {
