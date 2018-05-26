@@ -10,6 +10,7 @@ function mainNext() {
 }
 
 function main() {
-    mainGenerator = exp(1);
+    // mainGenerator = exp(1);
+    mainGenerator = initialIsRedBlack(3, 0, 5);
     mainNext();
 }
