@@ -1,10 +1,8 @@
-function Node(id, parent, label) {
+function Node(id, parent, label, color) {
     this.id = id;
     this.parent = parent;
     this.label = label;
-    this.toString = function () {
-        return "Node(" + id + ", " + parent + ", " + label + ")";
-    };
+    this.color = color;
 }
 
 function DotMaker() {
@@ -12,9 +10,9 @@ function DotMaker() {
     this.nodes = [];
 
     // returns the id of the created node
-    this.addNode = function (parent, label) {
+    this.addNode = function (parent, label, color) {
         var id = this.nextNodeId;
-        this.nodes.push(new Node(id, parent, label));
+        this.nodes.push(new Node(id, parent, label, color));
         this.nextNodeId++;
         return id;
     };
@@ -22,7 +20,11 @@ function DotMaker() {
     this.toDot = function () {
         var retval = "digraph {\n";
         this.nodes.forEach(function (node) {
-            retval += "n" + node.id + " [label=\"" + node.label + "\"];\n";
+            retval += "n" + node.id + " [label=\"" + node.label + "\"";
+            if (node.color) {
+                retval += ", style=filled, fillcolor=" + node.color;
+            }
+            retval += "]\n";
         });
         this.nodes.forEach(function (node) {
             if (node.parent !== null) {
