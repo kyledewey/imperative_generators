@@ -122,12 +122,8 @@ function exp(depth) {
                         Singleton(new Literal(3)));
     if (depth > 0) {
         var nested = And(exp(depth - 1),
-                         function (e1) {
-                             return And(exp(depth - 1),
-                                        function (e2) {
-                                            return Singleton(new Plus(e1, e2));
-                                        });
-                         });
+                         e1 => And(exp(depth - 1),
+                                   e2 => Singleton(new Plus(e1, e2))));
         return Or(literals, nested);
     } else {
         return literals;
