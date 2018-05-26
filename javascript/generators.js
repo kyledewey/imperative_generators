@@ -4,11 +4,47 @@
 // { nodeType: String,
 //   ... }
 
+function Node(id, parent, label) {
+    this.id = id;
+    this.parent = parent;
+    this.label = label;
+}
+
+function DotMaker() {
+    this.nextNodeId = 0;
+    this.nodes = [];
+
+    // returns the id of the created node
+    this.addNode = function (parent, label) {
+        var id = this.nextNodeId;
+        nodes.push(new Node(id, parent, label));
+        this.nextNodeId++;
+        return id;
+    };
+
+    this.toDot = function () {
+        var retval = "digraph {\n";
+        for (var node in this.nodes) {
+            retval += "n" + node.id + " [label=" + node.label + "];";
+        }
+        for (var node in this.nodes) {
+            if (node.parent !== null) {
+                retval += "n" + node.parent + " -> n" + node.id + ";";
+            }
+        }
+        retval += "}";
+        return retval;
+    };
+}
+
 function Literal(i) {
     this.nodeType = "literal";
     this.i = i;
     this.toString = function() {
         return i.toString();
+    };
+    this.processDot = function (parent, dotMaker) {
+        dotMaker.addNode(parent, "" + i);
     };
 }
 
@@ -19,11 +55,9 @@ function Plus(e1, e2) {
     this.toString = function() {
         return "(" + e1.toString() + " + " + e2.toString() + ")";
     };
-}
-
-function* or(gen1, gen2) {
-    yield* gen1;
-    yield* gen2;
+    this.processDot = function (parent, dotMaker) {
+        dotMaker.addNode(parent, "+");
+    };
 }
 
 const emptyFlag = { done: true };
@@ -144,6 +178,7 @@ function main() {
     
     viz.renderSVGElement('digraph { a -> b }')
         .then(function(element) {
-            document.body.appendChild(element);
+            var asXML = (new XMLSerializer()).serializeToString(element);
+            document.getElementById("graph_display").innerHTML = asXML;
         });
 }
