@@ -1,3 +1,5 @@
+var mainGenerator;
+
 // e \in Exp ::= i | plus(e1, e2)
 
 // AST:
@@ -8,6 +10,9 @@ function Node(id, parent, label) {
     this.id = id;
     this.parent = parent;
     this.label = label;
+    this.toString = function () {
+        return "Node(" + id + ", " + parent + ", " + label + ")";
+    };
 }
 
 function DotMaker() {
@@ -17,21 +22,21 @@ function DotMaker() {
     // returns the id of the created node
     this.addNode = function (parent, label) {
         var id = this.nextNodeId;
-        nodes.push(new Node(id, parent, label));
+        this.nodes.push(new Node(id, parent, label));
         this.nextNodeId++;
         return id;
     };
 
     this.toDot = function () {
         var retval = "digraph {\n";
-        for (var node in this.nodes) {
-            retval += "n" + node.id + " [label=" + node.label + "];";
-        }
-        for (var node in this.nodes) {
+        this.nodes.forEach(function (node) {
+            retval += "n" + node.id + " [label=\"" + node.label + "\"];\n";
+        });
+        this.nodes.forEach(function (node) {
             if (node.parent !== null) {
-                retval += "n" + node.parent + " -> n" + node.id + ";";
+                retval += "n" + node.parent + " -> n" + node.id + ";\n";
             }
-        }
+        });
         retval += "}";
         return retval;
     };
@@ -56,7 +61,9 @@ function Plus(e1, e2) {
         return "(" + e1.toString() + " + " + e2.toString() + ")";
     };
     this.processDot = function (parent, dotMaker) {
-        dotMaker.addNode(parent, "+");
+        var me = dotMaker.addNode(parent, "+");
+        this.e1.processDot(me, dotMaker);
+        this.e2.processDot(me, dotMaker);
     };
 }
 
@@ -172,13 +179,30 @@ function printAll(gen) {
     }
 }
 
-function main() {
-    //printAll(exp(1));
+function renderAST(ast) {
+    var maker = new DotMaker();
     var viz = new Viz();
-    
-    viz.renderSVGElement('digraph { a -> b }')
+
+    ast.processDot(null, maker);
+    var dot = maker.toDot();
+    // console.log(dot);
+    viz.renderSVGElement(dot)
         .then(function(element) {
             var asXML = (new XMLSerializer()).serializeToString(element);
             document.getElementById("graph_display").innerHTML = asXML;
         });
+}
+
+function mainNext() {
+    var cur = mainGenerator.next();
+    if (cur.done) {
+        document.getElementById("graph_display").innerHTML = "<p>No more elements</p>";
+    } else {
+        renderAST(cur.value);
+    }
+}
+
+function main() {
+    mainGenerator = exp(1);
+    mainNext();
 }
