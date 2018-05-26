@@ -139,5 +139,11 @@ function printAll(gen) {
 }
 
 function main() {
-    printAll(exp(1));
+    //printAll(exp(1));
+    var viz = new Viz();
+    
+    viz.renderSVGElement('digraph { a -> b }')
+        .then(function(element) {
+            document.body.appendChild(element);
+        });
 }
